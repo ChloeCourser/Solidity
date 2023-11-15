@@ -15,7 +15,14 @@ contract MintERC721 is ERC721 {
 
     mapping(address => uint256) public walletMints;
 
-    constructor() ERC721("MyNFT", "NFT") {}
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only the contract deployer can execute this function");
+        _;
+    }
+
+    constructor() ERC721("MyNFT", "NFT") {
+        owner = msg.sender;
+    }
 
     //Set URI to ipfs link, otherwise URI is set to default link
     //This can't check if the link works or not
@@ -70,8 +77,11 @@ contract MintERC721 is ERC721 {
         return walletMints[msg.sender];
     }
 
+    function withdraw() payable onlyOwner public {
+        require(payable(owner).send(address(this).balance));
+    }
+
     //TODO
-    //Need to be able to withdraw funds
     //Need to be able to set price below 1 ether
 }
 
